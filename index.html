@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLIP Fluid Pendant</title>
+    <meta name="description" content="Interactive fluid simulation using FLIP method - Fluid Pendant">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Google Fonts - Premium Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Main Controls -->
+        <div class="controls">
+            <!-- Grid Size (for non-rectangular shapes) -->
+            <div class="control-group" id="gridSizeControl">
+                <label class="tooltip"
+                    data-tooltip="Number of grid cells for the simulation. Higher values = more detail but slower performance.">
+                    Grid Size:
+                </label>
+                <input type="range" id="gridSize" min="5" max="100" value="50">
+                <span id="gridSizeValue">50</span>
+            </div>
+
+            <!-- LED Matrix Dimensions (for rectangular shape) -->
+            <div class="control-group led-dimensions" id="ledDimensionsControl" style="display: none;">
+                <label class="tooltip" data-tooltip="LED matrix dimensions (Width × Height)">
+                    LEDs:
+                </label>
+                <input type="number" id="ledWidth" min="3" max="100" value="100" style="width: 50px;">
+                <span>×</span>
+                <input type="number" id="ledHeight" min="3" max="100" value="60" style="width: 50px;">
+                <span id="ledTotalDisplay">(6000 LEDs)</span>
+            </div>
+
+            <div class="control-group">
+                <label>Display Mode:</label>
+                <select id="displayMode">
+                    <option value="particles">Particles Only</option>
+                    <option value="grid" selected>Grid Only</option>
+                    <option value="both">Both</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Container Shape:</label>
+                <select id="containerShape">
+                    <option value="rectangular" selected>Rectangular (LEDs)</option>
+                    <option value="square">Square ⬜</option>
+                    <option value="circular">Circular</option>
+                    <option value="heart">Heart ❤️</option>
+                    <option value="star">Star ⭐</option>
+                    <option value="diamond">Diamond 💎</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <input type="checkbox" id="separateParticles" checked>
+                <label for="separateParticles">Separate Particles</label>
+            </div>
+
+            <div class="control-group">
+                <input type="checkbox" id="gravityMode" checked>
+                <label for="gravityMode">Gravity Mode (Click to set direction)</label>
+            </div>
+
+            <div class="control-group">
+                <input type="checkbox" id="accelerometerMode">
+                <label for="accelerometerMode">Use Accelerometer (Mobile)</label>
+            </div>
+
+            <div class="control-group">
+                <button id="pauseBtn">⏸️ Pause</button>
+                <button id="resetBtn">🔄 Reset</button>
+                <span id="fpsDisplay">-- FPS</span>
+            </div>
+        </div>
+
+        <!-- Canvas -->
+        <canvas id="myCanvas"></canvas>
+    </div>
+
+    <!-- Advanced Settings Toggle -->
+    <button class="advanced-toggle" id="advancedToggle">⚙️ Advanced</button>
+
+    <!-- Advanced Settings Panel -->
+    <div id="advancedPanel" class="advanced-panel">
+        <div class="advanced-header">Advanced Settings</div>
+
+        <div class="advanced-section">
+            <h3>Grid & Physics</h3>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Controls the size of particles relative to grid cells.">
+                    Particle Radius Factor:
+                </label>
+                <input type="range" id="particleRadiusFactor" min="0.1" max="0.8" step="0.05" value="0.3">
+                <span class="value-display" id="particleRadiusValue">0.30</span>
+            </div>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Time step for physics simulation.">
+                    Time Step (dt):
+                </label>
+                <input type="range" id="timeStep" min="0.008" max="0.05" step="0.002" value="0.017">
+                <span class="value-display" id="timeStepValue">0.017</span>
+            </div>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Number of iterations for pressure solver.">
+                    Pressure Iterations:
+                </label>
+                <input type="range" id="pressureIters" min="10" max="200" step="5" value="50">
+                <span class="value-display" id="pressureItersValue">50</span>
+            </div>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Fluid density in kg/m³. Water ≈ 1000.">
+                    Density:
+                </label>
+                <input type="range" id="fluidDensity" min="100" max="2000" step="50" value="1000">
+                <span class="value-display" id="densityValue">1000</span>
+            </div>
+        </div>
+
+        <div class="advanced-section">
+            <h3>Fluid Behavior</h3>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="PIC/FLIP mixing ratio. 0.9 is optimal for realistic behavior.">
+                    PIC/FLIP Ratio:
+                </label>
+                <input type="range" id="flipRatio" min="0" max="10" value="9">
+                <span class="value-display" id="flipRatioValue">0.9</span>
+            </div>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Fluid viscosity - resistance to flow.">
+                    Viscosity:
+                </label>
+                <input type="range" id="viscosity" min="0" max="20" value="0">
+                <span class="value-display" id="viscosityValue">0.0</span>
+            </div>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="SOR parameter for pressure solver convergence.">
+                    Over-relaxation:
+                </label>
+                <input type="range" id="overRelaxation" min="1.0" max="2.0" step="0.1" value="1.9">
+                <span class="value-display" id="overRelaxationValue">1.9</span>
+            </div>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Corrects numerical drift in the simulation.">
+                    Compensate Drift:
+                </label>
+                <input type="checkbox" id="compensateDrift" checked>
+            </div>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Prevents particles from overlapping.">
+                    Separate Particles:
+                </label>
+                <input type="checkbox" id="advSeparateParticles" checked>
+            </div>
+        </div>
+
+        <div class="advanced-section">
+            <h3>Container Settings</h3>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Size factor for square container.">
+                    Square Size Factor:
+                </label>
+                <input type="range" id="squareSizeFactor" min="0.5" max="1.0" step="0.05" value="0.8">
+                <span class="value-display" id="squareSizeFactorValue">0.80</span>
+            </div>
+        </div>
+
+        <div class="advanced-section">
+            <h3>Fluid Distribution</h3>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Initial height of the fluid as percentage.">
+                    Water Height (%):
+                </label>
+                <input type="range" id="waterHeight" min="0.1" max="1.0" step="0.05" value="0.7">
+                <span class="value-display" id="waterHeightValue">70%</span>
+            </div>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Initial width of the fluid as percentage.">
+                    Water Width (%):
+                </label>
+                <input type="range" id="waterWidth" min="0.1" max="1.0" step="0.05" value="0.5">
+                <span class="value-display" id="waterWidthValue">50%</span>
+            </div>
+        </div>
+
+        <div class="advanced-section">
+            <h3>Rendering</h3>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Visual size of grid cells.">
+                    Grid Visual Size:
+                </label>
+                <input type="range" id="gridVisualSize" min="0.4" max="1.0" step="0.05" value="0.85">
+                <span class="value-display" id="gridVisualValue">0.85</span>
+            </div>
+            <div class="advanced-control">
+                <label class="tooltip" data-tooltip="Visual size multiplier for particles.">
+                    Particle Visual Size:
+                </label>
+                <input type="range" id="particleVisualSize" min="0.5" max="3.0" step="0.1" value="2.0">
+                <span class="value-display" id="particleVisualValue">2.0</span>
+            </div>
+        </div>
+
+        <div class="advanced-section">
+            <h3>Actions</h3>
+            <div class="advanced-control">
+                <button id="applyBtn" style="width: 100%; margin-bottom: 10px;">Apply Changes</button>
+            </div>
+            <div class="advanced-control">
+                <button id="resetSettingsBtn" style="width: 100%; background-color: #ff6b6b;">Reset to Defaults</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Script -->
+    <script type="module">
+        import { initApp, getApp } from './js/App.js';
+
+        // Initialize app when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = initApp();
+
+            // Wire up UI controls
+            setupUIControls(app);
+        });
+
+        /**
+         * Setup all UI control event listeners
+         */
+        function setupUIControls(app) {
+            // Main controls
+            document.getElementById('gridSize').addEventListener('input', (e) => {
+                document.getElementById('gridSizeValue').textContent = e.target.value;
+                clearTimeout(window.gridSizeTimeout);
+                window.gridSizeTimeout = setTimeout(() => app.resetSimulation(), 300);
+            });
+
+            document.getElementById('displayMode').addEventListener('change', (e) => {
+                app.changeDisplayMode(e.target.value);
+            });
+
+            document.getElementById('containerShape').addEventListener('change', (e) => {
+                const shape = e.target.value;
+                toggleLedControls(shape === 'rectangular');
+                app.changeContainerShape(shape);
+            });
+
+            // LED dimension controls
+            document.getElementById('ledWidth').addEventListener('change', (e) => {
+                updateLedTotal();
+                clearTimeout(window.ledTimeout);
+                window.ledTimeout = setTimeout(() => app.resetSimulation(), 300);
+            });
+
+            document.getElementById('ledHeight').addEventListener('change', (e) => {
+                updateLedTotal();
+                clearTimeout(window.ledTimeout);
+                window.ledTimeout = setTimeout(() => app.resetSimulation(), 300);
+            });
+
+            document.getElementById('separateParticles').addEventListener('change', (e) => {
+                app.scene.separateParticles = e.target.checked;
+                document.getElementById('advSeparateParticles').checked = e.target.checked;
+            });
+
+            document.getElementById('gravityMode').addEventListener('change', (e) => {
+                app.toggleGravityMode(e.target.checked);
+            });
+
+            document.getElementById('accelerometerMode').addEventListener('change', (e) => {
+                app.toggleAccelerometer(e.target.checked);
+            });
+
+            document.getElementById('pauseBtn').addEventListener('click', () => app.togglePause());
+            document.getElementById('resetBtn').addEventListener('click', () => app.resetSimulation());
+
+            // Advanced panel toggle
+            document.getElementById('advancedToggle').addEventListener('click', () => {
+                document.getElementById('advancedPanel').classList.toggle('open');
+            });
+
+            // Advanced settings
+            setupAdvancedControls(app);
+        }
+
+        /**
+         * Setup advanced control event listeners
+         */
+        function setupAdvancedControls(app) {
+            const controls = {
+                particleRadiusFactor: { display: 'particleRadiusValue', format: v => v.toFixed(2), setting: 'particleRadiusFactor' },
+                timeStep: { display: 'timeStepValue', format: v => v.toFixed(3), setting: 'timeStep', scene: 'dt' },
+                pressureIters: { display: 'pressureItersValue', format: v => v, setting: 'pressureIterations', scene: 'numPressureIters', parse: parseInt },
+                fluidDensity: { display: 'densityValue', format: v => v, setting: 'density', parse: parseFloat },
+                flipRatio: { display: 'flipRatioValue', format: v => (v * 0.1).toFixed(1), setting: 'flipRatio', scene: 'flipRatio', transform: v => v * 0.1 },
+                viscosity: { display: 'viscosityValue', format: v => parseFloat(v).toFixed(1), setting: 'viscosity', scene: 'viscosity' },
+                overRelaxation: { display: 'overRelaxationValue', format: v => parseFloat(v).toFixed(1), setting: 'overRelaxation', scene: 'overRelaxation' },
+                squareSizeFactor: { display: 'squareSizeFactorValue', format: v => parseFloat(v).toFixed(2), setting: 'squareSizeFactor' },
+                waterHeight: { display: 'waterHeightValue', format: v => Math.round(v * 100) + '%', setting: 'waterHeight' },
+                waterWidth: { display: 'waterWidthValue', format: v => Math.round(v * 100) + '%', setting: 'waterWidth' },
+                gridVisualSize: { display: 'gridVisualValue', format: v => parseFloat(v).toFixed(2), setting: 'gridVisualSize' },
+                particleVisualSize: { display: 'particleVisualValue', format: v => parseFloat(v).toFixed(1), setting: 'particleVisualSize' }
+            };
+
+            Object.entries(controls).forEach(([id, config]) => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', (e) => {
+                        let value = config.parse ? config.parse(e.target.value) : parseFloat(e.target.value);
+                        if (config.transform) value = config.transform(parseFloat(e.target.value));
+
+                        document.getElementById(config.display).textContent = config.format(e.target.value);
+                        app.advancedSettings[config.setting] = value;
+
+                        if (config.scene) {
+                            app.scene[config.scene] = value;
+                        }
+                    });
+                }
+            });
+
+            // Checkboxes
+            document.getElementById('compensateDrift').addEventListener('change', (e) => {
+                app.advancedSettings.compensateDrift = e.target.checked;
+                app.scene.compensateDrift = e.target.checked;
+            });
+
+            document.getElementById('advSeparateParticles').addEventListener('change', (e) => {
+                app.advancedSettings.separateParticles = e.target.checked;
+                app.scene.separateParticles = e.target.checked;
+                document.getElementById('separateParticles').checked = e.target.checked;
+            });
+
+            // Action buttons
+            document.getElementById('applyBtn').addEventListener('click', () => {
+                app.resetSimulation();
+                app.settingsManager.autoSave();
+            });
+
+            document.getElementById('resetSettingsBtn').addEventListener('click', () => {
+                app.settingsManager.reset();
+                app.resetSimulation();
+                // Reset UI to defaults
+                location.reload();
+            });
+
+            // Tooltip positioning
+            setupTooltips();
+        }
+
+        /**
+         * Setup dynamic tooltip positioning
+         */
+        function setupTooltips() {
+            const tooltips = document.querySelectorAll('#advancedPanel .tooltip');
+            tooltips.forEach(tooltip => {
+                tooltip.addEventListener('mouseenter', function () {
+                    const rect = this.getBoundingClientRect();
+                    const topPosition = rect.top + (rect.height / 2);
+                    this.style.setProperty('--tooltip-top', topPosition + 'px');
+                });
+            });
+        }
+
+        /**
+         * Toggle LED dimension controls visibility
+         */
+        function toggleLedControls(show) {
+            const gridControl = document.getElementById('gridSizeControl');
+            const ledControl = document.getElementById('ledDimensionsControl');
+
+            if (gridControl) gridControl.style.display = show ? 'none' : 'flex';
+            if (ledControl) ledControl.style.display = show ? 'flex' : 'none';
+        }
+
+        /**
+         * Update LED total display
+         */
+        function updateLedTotal() {
+            const width = parseInt(document.getElementById('ledWidth').value) || 16;
+            const height = parseInt(document.getElementById('ledHeight').value) || 12;
+            const total = width * height;
+            document.getElementById('ledTotalDisplay').textContent = `(${total} LEDs)`;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,365 @@
+/**
+ * Fluid Pendant - Simple Styles
+ */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    min-height: 100vh;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Main Wrapper */
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 24px;
+    /* More space between controls and canvas */
+}
+
+/* Controls */
+.controls {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Labels */
+label {
+    font-size: 13px;
+    color: #222;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* Range Inputs */
+input[type="range"] {
+    width: 100px;
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Number Inputs */
+input[type="number"] {
+    padding: 4px 8px;
+    background: #fff;
+    color: #222;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: monospace;
+    text-align: center;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+/* Select Dropdowns */
+select {
+    padding: 6px 12px;
+    background: #fff;
+    color: #222;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+/* Checkboxes */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #4CAF50;
+}
+
+/* Buttons */
+button {
+    padding: 5px 15px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button#pauseBtn {
+    background-color: #f39c12;
+}
+
+button#pauseBtn:hover {
+    background-color: #d68910;
+}
+
+button#resetBtn {
+    background-color: #3498db;
+}
+
+button#resetBtn:hover {
+    background-color: #2e86c1;
+}
+
+/* Canvas */
+#myCanvas {
+    display: block;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    background: #ffffff;
+    max-width: 100%;
+}
+
+/* LED Dimensions specific styling */
+.led-dimensions {
+    gap: 8px;
+}
+
+.led-dimensions span {
+    font-size: 13px;
+    color: #666;
+}
+
+#ledTotalDisplay {
+    font-family: monospace;
+    color: #2c3e50;
+    font-weight: bold;
+    margin-left: 4px;
+}
+
+/* FPS Display */
+#fpsDisplay {
+    padding: 6px 12px;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #1b5e20;
+    min-width: 70px;
+    text-align: center;
+}
+
+/* Advanced Panel */
+.advanced-panel {
+    position: fixed;
+    top: 0;
+    right: -350px;
+    width: 340px;
+    height: 100vh;
+    background-color: #f8f9fa;
+    border-left: 2px solid #333;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    padding-top: 60px;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.advanced-panel.open {
+    right: 0;
+}
+
+.advanced-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 10001;
+    font-size: 14px;
+}
+
+.advanced-toggle:hover {
+    background-color: #555;
+}
+
+.advanced-header {
+    position: fixed;
+    top: 0;
+    right: -350px;
+    width: 340px;
+    background-color: #333;
+    color: white;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 1001;
+    transition: right 0.3s ease;
+}
+
+.advanced-panel.open .advanced-header {
+    right: 0;
+}
+
+.advanced-section {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.advanced-section h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.advanced-control {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.advanced-control label {
+    font-size: 12px;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+    font-weight: normal;
+}
+
+.advanced-control input[type="range"] {
+    width: 100px;
+}
+
+.value-display {
+    min-width: 40px;
+    font-size: 11px;
+    text-align: right;
+    color: #333;
+}
+
+/* Tooltips */
+.tooltip {
+    cursor: help;
+}
+
+.tooltip::before {
+    content: attr(data-tooltip);
+    position: fixed;
+    right: 360px;
+    top: var(--tooltip-top, 50%);
+    transform: translateY(-50%);
+    background-color: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    width: 250px;
+    white-space: normal;
+    line-height: 1.4;
+    pointer-events: none;
+}
+
+.tooltip:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+.controls .tooltip::before {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    bottom: calc(100% + 10px);
+    top: auto;
+}
+
+.advanced-panel:not(.open) .tooltip::before {
+    display: none;
+}
+
+/* RAM Monitor */
+#realRamInfo {
+    margin-top: 12px;
+    padding: 12px;
+    background: #ffffff;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 12px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    body {
+        padding: 8px;
+    }
+
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .control-group {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .advanced-panel {
+        width: 100%;
+        right: -100%;
+    }
+
+    .advanced-panel.open {
+        right: 0;
+    }
+
+    .advanced-header {
+        width: 100%;
+        right: -100%;
+    }
+
+    .advanced-panel.open .advanced-header {
+        right: 0;
+    }
+}
