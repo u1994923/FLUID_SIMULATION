@@ -2,8 +2,6 @@
 
 A modular, interactive fluid simulation using the **FLIP (Fluid-Implicit-Particle)** method. Perfect for creating realistic water effects in pendants, jewelry, or any container shape.
 
-![Fluid Pendant Demo](docs/demo.png)
-
 ## 📁 Project Structure
 
 ```
